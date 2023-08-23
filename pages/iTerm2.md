@@ -1,20 +1,18 @@
-# 安装iTerm2
-https://iterm2.com/downloads.html
+# 安装 [iTerm2](https://iterm2.com/)
 
-# 安装Oh my zsh
-https://ohmyz.sh/
+[https://iterm2.com/downloads.html](https://iterm2.com/downloads.html)
 
-* curl 安装方式
+# 安装 [Oh my zsh](https://ohmyz.sh/)
+
+### curl 安装方式
 
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
-* wget 安装方式
+### wget 安装方式
 
     sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
 
-# 安装PowerLine
-http://powerline.readthedocs.io/en/latest/installation.html
-
+# 安装 [PowerLine](http://powerline.readthedocs.io/en/latest/installation.html)
 安装powerline的方式依然简单，也只需要一条命令：
 
     pip install powerline-status --user
@@ -23,7 +21,7 @@ http://powerline.readthedocs.io/en/latest/installation.html
 
     pip3 install powerline-status --user
 
-# 安装PowerFonts
+# 安装 [PowerFonts](https://github.com/powerline/fonts)
 
 安装字体库需要首先将项目git clone至本地，然后执行源码中的install.sh。
 
@@ -35,15 +33,14 @@ http://powerline.readthedocs.io/en/latest/installation.html
 
 安装好字体库之后，我们来设置iTerm2的字体，具体的操作是iTerm2 -> Preferences -> Profiles -> Text，在Font区域选中Change Font，然后找到Meslo LG字体。有L、M、S可选.
 
-# 安装配色方案
+# 安装[配色方案(Color Schemes)](https://iterm2colorschemes.com/)
 
 ### 先下载配色方案
 
-* https://iterm2colorschemes.com/
-* https://github.com/mbadolato/iTerm2-Color-Schemes
-* Dracula: https://draculatheme.com/iterm
-* Gruvbox: https://github.com/morhetz/gruvbox-contrib/tree/master/iterm2
-* Solarized: https://github.com/altercation/solarized
+* [iTerm2-Color-Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes)
+* [Dracula](https://draculatheme.com/iterm)
+* [Gruvbox](https://github.com/morhetz/gruvbox-contrib/tree/master/iterm2) `(Recommend)`
+* [Solarized](https://github.com/altercation/solarized)
 
 ### 然后在iTerm2中安装
 
@@ -53,8 +50,7 @@ http://powerline.readthedocs.io/en/latest/installation.html
 4. Select the Dracula.itermcolors file
 5. Select the Dracula from Color Presets...
 
-# 安装主题
-https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+# 安装[主题(Themes)](https://github.com/ohmyzsh/ohmyzsh/wiki/Themes)
 
 
 ### 下载agnoster主题，执行脚本安装：
@@ -78,16 +74,20 @@ https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ### 下载插件
 
     cd ~/.oh-my-zsh/custom/plugins/
-    git clone https://github.com/zsh-users/zsh-autosuggestions
+    git clone https://github.com/zsh-users/zsh-autosuggestions.git
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
 
 ### 打开zshrc
 
     vi ~/.zshrc
 
-### 在 plugins 后面添加插件
+### 在 plugins 内添加插件
 
-    ss
+    plugins=(
+            git
+            zsh-autosuggestions
+            zsh-syntax-highlighting
+            )
 
 # 应用 .zshrc
 
