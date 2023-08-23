@@ -1,2 +1,3 @@
 # xinyzhao.github.io
-My web site.
+
+# [安装 iTerm2](pages/iTerm2.md)
