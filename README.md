@@ -1,3 +1,9 @@
 # xinyzhao.github.io
 
-# [安装 iTerm2](pages/iTerm2.md)
+* [iTerm2](pages/iTerm2.md)
+
+* [httpd](pages/httpd.md)
+
+* [mysql](pages/mysql.md)
+
+* [nginx](pages/nginx.md)
