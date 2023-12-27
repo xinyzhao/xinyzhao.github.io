@@ -7,3 +7,5 @@
 * [mysql](pages/mysql.md)
 
 * [nginx](pages/nginx.md)
+
+* [google maps](pages/googlemaps.md)
