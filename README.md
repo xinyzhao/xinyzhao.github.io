@@ -11,3 +11,5 @@
 * [google maps](pages/googlemaps.md)
 
 * [HEV](pages/hev.md)
+
+* [Centos7+WiFi](pages/centos7+wifi.md)
