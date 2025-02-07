@@ -30,6 +30,12 @@ IN-USE  SSID                          MODE   CHAN  RATE        SIGNAL  BARS  SEC
 
 接下来连接WIFI网络使用命令：
 ```
+https://xinyzhao.github.io/
+```
+
+连接后让我们来检查一下连接状态：
+https://xinyzhao.github.io/
+```
 [root@a ~]# nmcli dev status
 DEVICE  TYPE      STATE      CONNECTION 
 wlp2s0  wifi      connected  TP-LINK_**********   
