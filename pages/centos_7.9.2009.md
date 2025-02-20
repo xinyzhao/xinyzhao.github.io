@@ -23,7 +23,7 @@
   vi /etc/sysconfig/network-scripts/ifcfg-ens33
   ```
 
-  ```ifcfg-ens33
+  ```sh
   TYPE=Ethernet
   PROXY_METHOD=none
   BROWSER_ONLY=no
@@ -162,7 +162,7 @@
 
   > [oh my zsh 主题预览](https://github.com/ohmyzsh/ohmyzsh/wiki/themes)
 
-  ```~/.zshrc
+  ```sh
   # 设置主题
   ZSH_THEME="agnoster"
   # 添加插件
@@ -285,7 +285,7 @@ npm config get registry
   sudo vi /etc/nginx/nginx.conf
   ```
 
-  ```nginx.conf
+  ```nginx
   # 设置为当前用户
   user  YOUR_USERNAME;
   # sftp 配置
@@ -312,7 +312,7 @@ npm config get registry
   sudo vi /etc/nginx/conf.d/sftp.conf
   ```
 
-  ```sftp.conf
+  ```nginx
   server {
     listen 80;
     server_name sftp.YOUR_DOMAIN;
@@ -482,7 +482,7 @@ npm config get registry
   sudo vi /etc/systemd/system/minio.service
   ```
 
-  ```minio.service
+  ```sh
   [Unit]
   Description=MinIO Object Storage
   Documentation=https://docs.min.io
@@ -626,7 +626,7 @@ npm config get registry
   sudo vim /etc/nginx/conf.d/alist.conf
   ```
 
-  ```alist.conf
+  ```nginx
   server {
     listen 80;
     server_name alist.YOUR_DOMAIN;
@@ -713,7 +713,7 @@ npm config get registry
   sudo vi /etc/nginx/conf.d/gitlab.conf
   ```
 
-  ```gitlab.conf
+  ```nginx
   server {
     listen 80;
     server_name gitlab.YOUR_DOMAIN;
