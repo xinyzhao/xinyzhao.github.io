@@ -150,3 +150,36 @@ DROP USER ‘username’@'host’;
 ```sql
 flush privileges;
 ```
+
+### 如果忘记密码，可以重置密码
+
+```sh
+# 编辑my.cnf
+sudo vim /etc/my.cnf
+# 在[mysqld]下添加
+skip-grant-tables
+# 重启mysql
+sudo systemctl restart mysqld
+# 登录mysql
+mysql -u root
+```
+
+```sql
+-- 先刷新权限
+FLUSH PRIVILEGES;
+-- 然后重置密码
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'NEW_PASSWORD';
+-- 再次刷新权限
+FLUSH PRIVILEGES;
+-- 退出
+EXIT;
+```
+
+```sh
+# 删除skip-grant-tables
+sudo sed -i '/skip-grant-tables/d' /etc/my.cnf
+# 删除skip-grant-tables
+sudo systemctl restart mysqld
+```
+
+
