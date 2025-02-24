@@ -457,8 +457,11 @@ npm config get registry
 
   # 修改 pg_hba.conf
   sudo vim /var/lib/pgsql/14/data/pg_hba.conf
-  # 在文件末尾添加以下内容
-  host  all  all  0.0.0.0/0  md5
+  # TYPE  DATABASE        USER            ADDRESS                 METHOD
+  # "local" is for Unix domain socket connections only
+  local   all             all                                     md5
+  # IPv4 local connections:
+  host    all             all             0.0.0.0/0               md5
 
   # 修改 postgresql.conf
   sudo vim /var/lib/pgsql/14/data/postgresql.conf
@@ -474,11 +477,18 @@ npm config get registry
   sudo yum install -y postgis33_14
 
   # 登录数据库
-  psql -U postgres -h 127.0.0.1
+  psql -U postgres
+  # 创建数据库
+  CREATE DATABASE xxx;
   # 安装扩展
   CREATE EXTENSION IF NOT EXISTS postgis;
   # 退出数据库命令：\q 或 exit 或 quit
   \q
+
+  # 导出数据库
+  pg_dump -U postgres -d xxx > pgdump_xxx_$(date +%Y%m%d%H%M%S).sql
+  # 导入数据库
+  psql -U postgres -d xxx < xxx.sql
   ```
 
 ### minio
