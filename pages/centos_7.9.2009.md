@@ -143,7 +143,7 @@
   # 安装zsh和git
   sudo yum -y install zsh git
   # 设置为zsh
-  sudo chsh -s /bin/zsh
+  chsh -s /bin/zsh
   # 安装oh my zsh
   git clone https://gitee.com/mirrors/oh-my-zsh.git ~/.oh-my-zsh
   # 配置zshrc
@@ -510,8 +510,8 @@ npm config get registry
 
   ```minio
   # MinIO 服务的配置
-  MINIO_ROOT_USER=minio
-  MINIO_ROOT_PASSWORD=minio
+  MINIO_ROOT_USER=minioadmin
+  MINIO_ROOT_PASSWORD=minioadmin
   MINIO_VOLUMES="/opt/minio/data"
   MINIO_OPTS="--address :9000 --console-address :9001"
   ```
