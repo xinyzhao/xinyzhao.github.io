@@ -178,7 +178,7 @@ EXIT;
 ```sh
 # 删除skip-grant-tables
 sudo sed -i '/skip-grant-tables/d' /etc/my.cnf
-# 删除skip-grant-tables
+# 重启mysql
 sudo systemctl restart mysqld
 ```
 
