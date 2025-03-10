@@ -40,8 +40,8 @@
   IPADDR=192.168.x.x        # 设置静态IP地址
   NETMASK=255.255.255.0     # 子网掩码
   GATEWAY=192.168.x.1       # 默认网关
-  DNS1=8.8.8.8              # 主DNS服务器
-  DNS2=114.114.114.114      # 备用DNS服务器
+  DNS1=223.5.5.5            # 主DNS服务器
+  DNS2=8.8.8.8              # 备用DNS服务器
   ```
 
   ```sh
@@ -53,45 +53,20 @@
   ping -c 4 www.baidu.com
   ```
 
-### 配置yum源
-
-[参考1](https://www.cnblogs.com/hzke/p/17849772.html)
-[参考2](https://www.cnblogs.com/lanjianhua/p/18357189)
-
-  ```sh
-  # 备份本地yum源
-  cd /etc/yum.repos.d/
-  mkdir backup
-  mv *.repo backup/
-  # 查看系统版本
-  cat /etc/redhat-release
-  # 配置阿里云yum源
-  curl -O https://mirrors.aliyun.com/repo/Centos-7.repo
-  # 配置epel库
-  curl -O https://mirrors.aliyun.com/repo/epel-7.repo
-  # 清除缓存
-  yum clean all
-  # 生成缓存
-  yum makecache
-  ```
-
 ### 网络配置
 
   ```sh
-  # 安装网络工具包和vim
-  sudo yum install -y net-tools vim
-
-  # 临时关闭防火墙
-  systemctl stop firewalld
-  # 永久关闭防火墙
-  systemctl disable firewalld
-
   # 临时关闭SELinux 
   setenforce 0
   # 永久关闭SELinux
   vi /etc/selinux/config
   # 将SELINUX=enforcing修改为SELINUX=disabled
   SELINUX=disabled
+
+  # 临时关闭防火墙
+  systemctl stop firewalld
+  # 永久关闭防火墙
+  systemctl disable firewalld
   ```
 
 ### 配置ssh
@@ -109,6 +84,11 @@
 
   # 重启ssh服务
   sudo systemctl restart sshd
+
+  # 添加ssh防火墙规则
+  firewall-cmd --zone=public --add-port=22/tcp --permanent
+  # 重启防火墙
+  firewall-cmd --reload
   ```
 
 ### 添加新用户
@@ -132,7 +112,35 @@
 
   # 测试新用户sudo权限
   su - YOUR_USERNAME
-  sudo whoami  # 应该输出 root
+  whoami
+  ```
+
+### 安装网络工具包和vim
+
+  ```sh
+  sudo yum install -y net-tools vim
+  ```
+
+### 配置yum源
+
+[参考1](https://www.cnblogs.com/hzke/p/17849772.html)
+[参考2](https://www.cnblogs.com/lanjianhua/p/18357189)
+
+  ```sh
+  # 备份本地yum源
+  sudo cd /etc/yum.repos.d/
+  sudo mkdir backup
+  sudo mv *.repo backup/
+  # 查看系统版本
+  sudo cat /etc/redhat-release
+  # 配置阿里云yum源
+  sudo curl -O https://mirrors.aliyun.com/repo/Centos-7.repo
+  # 配置epel库
+  sudo curl -O https://mirrors.aliyun.com/repo/epel-7.repo
+  # 清除缓存
+  yum clean all
+  # 生成缓存
+  yum makecache
   ```
 
 ## 应用环境
@@ -152,10 +160,6 @@
   git clone https://gitee.com/dawnwords/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
   # 自动补全插件
   git clone https://gitee.com/lhaisu/zsh-autosuggestions.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-  # 目录跳转插件
-  git clone https://gitee.com/gentlecp/autojump.git
-  cd autojump
-  ./install.py
   # 编辑zshrc
   vim ~/.zshrc
   ```
@@ -170,7 +174,6 @@
         git
         zsh-autosuggestions
         zsh-syntax-highlighting
-        autojump
         z
   )
   ```
@@ -178,6 +181,25 @@
   ```sh
   # 使环境变量生效
   source ~/.zshrc
+  ```
+
+### tmux
+
+  ```sh
+    # 安装tmux
+  sudo yum install -y tmux
+
+  # 创建新会话
+  tmux new -s session_name
+
+  # 断开但保持会话运行（按键组合）
+  Ctrl + b, d
+
+  # 查看现有会话
+  tmux ls
+
+  # 恢复之前的会话
+  tmux attach -t session_name
   ```
 
 ### java
@@ -188,7 +210,7 @@
   rpm -qa | grep java
 
   # 安装java
-  sudo yum install -y java-1.8.0-openjdk*
+  sudo yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel
 
   # 查找安装路径
   which java
@@ -280,31 +302,14 @@ npm config get registry
   sudo firewall-cmd --permanent --zone=public --add-service=http
   sudo firewall-cmd --permanent --zone=public --add-service=https
   sudo firewall-cmd --reload
-  
+
   # 修改配置文件：
   sudo vi /etc/nginx/nginx.conf
   ```
 
   ```nginx
-  # 设置为当前用户
-  user  YOUR_USERNAME;
-  # sftp 配置
-  server {
-    #listen 80;
-    #server_name YOUR_DOMAIN www.YOUR_DOMAIN;
-    
-    location /sftp {
-      alias /home/YOUR_USERNAME/sftp; # 文件存储路径
-      autoindex on;                   # 开启目录索引
-      autoindex_exact_size off;       # 显示文件大小（off时显示大概大小）
-      autoindex_localtime on;         # 显示文件时间为服务器本地时间
-
-      # 如果配置了下方的sftp.conf，则可以使用 proxy_pass 代理到 sftp.conf 中配置的地址
-      proxy_pass http://sftp.YOUR_DOMAIN;
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-    }
-  }
+  # 设置为root用户或者对网站目录有读写权限的用户
+  user  root;
   ```
 
   ```sh
@@ -326,6 +331,15 @@ npm config get registry
   }
   ```
 
+  ```sh
+  # 添加 80 端口
+  sudo firewall-cmd --permanent --zone=public --add-port=80/tcp
+  # 添加 443 端口
+  sudo firewall-cmd --permanent --zone=public --add-port=443/tcp
+  # 重启防火墙
+  sudo firewall-cmd --reload
+  ```
+
 ### mysql
 
   ```sh
@@ -339,9 +353,9 @@ npm config get registry
   sudo yum localinstall https://dev.mysql.com/get/mysql84-community-release-el7-1.noarch.rpm -y
   # 安装 MySQL 社区版
   sudo yum install -y mysql-community-server
-  # 启动 MySQL 服务
-  sudo systemctl start mysqld
+  # 启用并启动 MySQL 服务
   sudo systemctl enable mysqld
+  sudo systemctl start mysqld
   # 获取临时密码
   sudo grep 'temporary password' /var/log/mysqld.log
   # 运行安全脚本
@@ -351,6 +365,15 @@ npm config get registry
   ```
 
   ```sql
+  -- 重置root密码
+  ALTER USER 'root'@'localhost' IDENTIFIED BY 'ROOT_PASSWORD';
+  -- 注意：新密码必须满足MySQL的密码策略要求：
+  -- 至少8个字符
+  -- 包含大写字母
+  -- 包含小写字母
+  -- 包含数字
+  -- 包含特殊字符
+
   -- 创建新用户并授权(根据需要调整权限)
   CREATE USER 'YOUR_USERNAME'@'%' IDENTIFIED BY 'YOUR_PASSWORD';
   -- 授予所有权限
@@ -377,31 +400,28 @@ npm config get registry
   ```
 
   ```sh
-  # 如果忘记密码，可以重置密码
+  # 1. 编辑MySQL配置文件
   sudo vim /etc/my.cnf
-  # 在[mysqld]下添加
+
+  # 2. 在[mysqld]部分添加
   skip-grant-tables
-  # 重启mysql
+
+  # 3. 重启MySQL服务
   sudo systemctl restart mysqld
-  # 登录mysql
+
+  # 4. 无密码登录
   mysql -u root
-  ```
 
-  ```sql
-  -- 先刷新权限
+  # 5. 执行以下SQL命令
   FLUSH PRIVILEGES;
-  -- 然后重置密码
   ALTER USER 'root'@'localhost' IDENTIFIED BY 'NEW_PASSWORD';
-  -- 再次刷新权限
   FLUSH PRIVILEGES;
-  -- 退出
   EXIT;
-  ```
 
-  ```sh
-  # 删除skip-grant-tables
+  # 6. 删除skip-grant-tables
   sudo sed -i '/skip-grant-tables/d' /etc/my.cnf
-  # 重启mysql
+
+  # 7. 重启MySQL服务
   sudo systemctl restart mysqld
   ```
 
@@ -412,34 +432,35 @@ npm config get registry
   sudo yum install -y epel-release
   # 安装redis
   sudo yum install redis -y
-  # 启动redis
-  sudo systemctl start redis
-  # 设置开机自启动
+  # 修改配置文件  
+  sudo vim /etc/redis.conf
+  # 找到requirepass foobared并设置密码
+  requirepass YOUR_PASSWORD
+  # 启用并启动 redis
   sudo systemctl enable redis
+  sudo systemctl start redis
   # 查看redis状态
   sudo systemctl status redis
   # 如果启用了防火墙，需要开放 Redis 端口（如果需要远程访问）
   sudo firewall-cmd --permanent --add-port=6379/tcp
   sudo firewall-cmd --reload
-  # 测试Redis连接
+  # 测试Redis连接，应该看到回复：PONG
   redis-cli ping
-  # 在Redis命令行中，输入ping，您应该看到回复：PONG，
-  # 输入exit退出Redis命令行
   ```
 
 ### postgresql + postgis
 
   ```sh
-  # Install the repository RPM:
+  # 安装 rpm 库
   sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
-  # Install PostgreSQL:
+  # 安装 PostgreSQL:
   sudo yum install -y postgresql14 postgresql14-contrib postgresql14-server
 
-  # Optionally initialize the database and enable automatic start:
+  # 初始化数据库
   sudo /usr/pgsql-14/bin/postgresql-14-setup initdb
 
-  # 启动并设置开机自启
+  # 启用并启动
   sudo systemctl enable postgresql-14
   sudo systemctl start postgresql-14
   # 检查状态
@@ -470,6 +491,10 @@ npm config get registry
 
   # 重启服务
   sudo systemctl restart postgresql-14
+
+  # 添加防火墙端口
+  sudo firewall-cmd --permanent --zone=public --add-port=5432/tcp
+  sudo firewall-cmd --reload
 
   # 查看和postgresql版本对应的postgis
   sudo yum list | grep postgis
@@ -599,7 +624,6 @@ npm config get registry
       "https://docker.1ms.run",
       "https://docker.xuanyuan.me"
     ],
-    "dns": ["8.8.8.8", "114.114.114.114"],
     "log-driver": "json-file",
     "log-opts": {
       "max-size": "100m",
@@ -661,6 +685,10 @@ npm config get registry
   # 卸载 AList
   sudo bash v3.sh uninstall
 
+  # 添加防火墙端口
+  sudo firewall-cmd --permanent --zone=public --add-port=5244/tcp
+  sudo firewall-cmd --reload
+
   # 配置nginx
   sudo vim /etc/nginx/conf.d/alist.conf
   ```
@@ -669,12 +697,53 @@ npm config get registry
   server {
     listen 80;
     server_name alist.YOUR_DOMAIN;
+
+    # 客户端文件大小限制
+    client_max_body_size 20480m;
+    client_body_buffer_size 256k;
+    
+    # 大文件传输优化
+    proxy_request_buffering off;
+    proxy_buffering off;
+    
+    # 超时设置
+    proxy_connect_timeout 600;
+    proxy_send_timeout 600;
+    proxy_read_timeout 600;
+    
+    # 缓冲区设置
+    proxy_buffer_size 128k;
+    proxy_buffers 32 128k;
+    proxy_busy_buffers_size 256k;
+    
     location / {
       proxy_pass http://127.0.0.1:5244;
+      
+      # 基础代理设置
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header X-Forwarded-Proto $scheme;
+      
+      # AList 特定设置
+      proxy_set_header Range $http_range;
+      proxy_set_header If-Range $http_if_range;
+      proxy_no_cache $http_range $http_if_range;
+      
+      # WebSocket 支持
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      
+      # 跨域支持
+      add_header Access-Control-Allow-Origin *;
+      add_header Access-Control-Allow-Methods 'GET, POST, PUT, DELETE, OPTIONS';
+      add_header Access-Control-Allow-Headers '*';
+      
+      # 处理 OPTIONS 请求
+      if ($request_method = 'OPTIONS') {
+          return 204;
+      }
     }
   }
   ```
@@ -724,15 +793,12 @@ npm config get registry
   # 启动所有服务
   sudo gitlab-ctl start
 
-  # 更新防火墙规则
-  sudo firewall-cmd --permanent --add-port=8929/tcp
+  # 添加防火墙规则5080
+  sudo firewall-cmd --permanent --zone=public --add-port=5080/tcp
   sudo firewall-cmd --reload
 
   # 验证端口是否开放
   sudo firewall-cmd --list-ports
-
-  # 查看初始密码（root用户）
-  sudo cat /etc/gitlab/initial_root_password
 
   # 检查服务是否正常运行
   sudo gitlab-ctl status
@@ -756,21 +822,79 @@ npm config get registry
   server {
     listen 80;
     server_name gitlab.YOUR_DOMAIN;
+    
+    # 客户端请求大小限制
+    client_max_body_size 512m;
+    
+    # 超时设置
+    proxy_connect_timeout 300;
+    proxy_send_timeout 300;
+    proxy_read_timeout 300;
+    send_timeout 300;
+    
+    # 缓冲区设置
+    proxy_buffers 8 16k;
+    proxy_buffer_size 32k;
+    proxy_busy_buffers_size 64k;
+    
+    # 临时文件设置
+    proxy_temp_file_write_size 64k;
+    proxy_temp_path /tmp/nginx_proxy_temp;
+    
     location / {
-      proxy_pass http://127.0.0.1:8929;
-      proxy_set_header Host $host;
+      proxy_pass http://127.0.0.1:8929;  # GitLab 端口
+      
+      # 基础代理设置
+      proxy_set_header Host $http_host;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header X-Forwarded-Proto $scheme;
+      
+      # WebSocket 支持
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      
+      # 其他必要设置
+      proxy_redirect off;
+      proxy_buffering off;
+      proxy_request_buffering off;
+      
+      # 解决 chunked encoding 问题
+      proxy_cache off;
+      proxy_set_header Connection "";
+      
+      # 处理大文件上传
+      client_body_buffer_size 128k;
+      client_body_timeout 300;
+    }
+    
+    # 处理 Assets
+    location ~ ^/(assets)/ {
+      proxy_pass http://127.0.0.1:8929;
+      proxy_cache_valid 200 30m;
+      proxy_cache_use_stale error timeout http_500 http_502 http_503 http_504;
+      proxy_cache_key $uri;
+      proxy_cache_lock on;
+      proxy_cache_lock_timeout 5s;
+      expires 1y;
+      add_header Cache-Control public;
     }
   }
+  ```
+
+  ```sh
+  # 重启nginx
+  sudo systemctl restart nginx;
+  # 查看初始密码（root用户）
+  sudo cat /etc/gitlab/initial_root_password
   ```
 
 ### 项目管理系统：[planka](https://planka.app/)
 
   ```sh
   # 安装 Docker 和 Docker Compose
-  sudo yum install -y docker docker-compose
+  sudo yum install -y docker-ce
 
   # 创建并进入目录
   mkdir planka && cd planka
@@ -796,16 +920,20 @@ npm config get registry
   - DEFAULT_ADMIN_NAME=YOUR_NAME
   - DEFAULT_ADMIN_USERNAME=YOUR_USERNAME
 
+  # 添加防火墙端口
+  sudo firewall-cmd --permanent --zone=public --add-port=3000/tcp
+  sudo firewall-cmd --reload
+
   # 启动项目
-  docker-compose up -d
+  docker compose up -d
   # 停止项目
-  docker-compose down
+  docker compose down
   # 停止并删除现有容器和数据
-  docker-compose down -v
+  docker compose down -v
   # 查看日志
-  docker-compose logs planka
+  docker compose logs planka
   # 重启项目
-  docker-compose restart planka
+  docker compose restart planka
 
   # 配置nginx反向代理
   sudo vi /etc/nginx/conf.d/planka.conf
@@ -813,22 +941,43 @@ npm config get registry
 
   ```nginx
   server {
-      listen 80;
-      server_name planka.YOUR_DOMAIN;
-
-      location / {
-          proxy_pass http://127.0.0.1:3000;
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-      }
+    listen 80;
+    server_name planka.YOUR_DOMAIN;
+  
+    # 客户端文件大小限制
+    client_max_body_size 100M;
+      
+    # 超时设置
+    proxy_connect_timeout 600;
+    proxy_send_timeout 600;
+    proxy_read_timeout 600;
+    send_timeout 600;
+   
+    location / {
+      proxy_pass http://127.0.0.1:3000;
+          
+      # WebSocket 支持（关键配置）
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+          
+      # 基础代理设置
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+          
+      # 禁用缓存
+      proxy_buffering off;
+      proxy_request_buffering off;
+    }
   }
   ```
 
   ```sh
   # 重启nginx使配置生效
   sudo systemctl restart nginx
+  # planka怎么配置多域名
   ```
 
 END.
