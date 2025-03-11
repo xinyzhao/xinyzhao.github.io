@@ -65,30 +65,8 @@
 
   # 临时关闭防火墙
   systemctl stop firewalld
-  # 永久关闭防火墙
+  # 永久关闭防火墙（不建议）
   systemctl disable firewalld
-  ```
-
-### 配置ssh
-
-  ```sh
-  # 编辑ssh配置文件
-  vi /etc/ssh/sshd_config
-  
-  # 配置端口
-  Port 2222                 # 修改默认端口以增加安全性
-  # 登录限制
-  PermitRootLogin no        # 禁用root用户登录
-  PermitEmptyPasswords no   # 禁用空密码登录
-  PasswordAuthentication no # 禁用密码登录（使用密钥对认证）
-
-  # 重启ssh服务
-  sudo systemctl restart sshd
-
-  # 添加ssh防火墙规则
-  firewall-cmd --zone=public --add-port=22/tcp --permanent
-  # 重启防火墙
-  firewall-cmd --reload
   ```
 
 ### 添加新用户
@@ -113,6 +91,53 @@
   # 测试新用户sudo权限
   su - YOUR_USERNAME
   whoami
+  ```
+
+### 配置ssh
+
+  ```sh
+  # 编辑ssh配置文件
+  vi /etc/ssh/sshd_config
+  ```
+
+  ```ssh-config
+  # 修改默认端口以增加安全性
+  Port 2222
+  # 禁用root用户登录
+  PermitRootLogin no
+  # 禁用空密码登录
+  PermitEmptyPasswords no
+  # 使用密码登录
+  PasswordAuthentication yes
+
+  # 建议开启白名单或黑名单，名称间用空格分开
+  # 优先级顺序：DenyUsers > AllowUsers > DenyGroups > AllowGroups
+  # DenyUsers 中的用户将始终被拒绝登录
+  DenyUsers u1 u2 u3
+  # 如果用户在 DenyGroups 中的任何组中，将被拒绝登录，除非该用户在 AllowUsers 列表中
+  DenyGroups g1 g2 g3
+  # 如果同时设置了 AllowUsers 和 AllowGroups，用户必须在 AllowUsers 列表中并且属于 AllowGroups 中的某个组
+  AllowUsers u4 u5 u6
+  AllowGroups g4 g5 g6
+  ```
+
+  ```sh
+  # 添加ssh防火墙规则
+  firewall-cmd --zone=public --add-port=2222/tcp --permanent
+  # 重启防火墙
+  firewall-cmd --reload
+
+  # 查看用户所属组
+  groups username
+
+  # 将用户添加到允许的组
+  sudo usermod -aG allowed_group username
+
+  # 重启ssh服务
+  sudo systemctl restart sshd
+
+  # 查看 SSH 日志
+  sudo tail -f /var/log/secure
   ```
 
 ### 安装网络工具包和vim
@@ -425,6 +450,43 @@ npm config get registry
   sudo systemctl restart mysqld
   ```
 
+  ```sh
+  # 备份数据库，会有安全警告
+  mysqldump --single-transaction -u YOUR_USERNAME -pYOUR_PASSWORD YOUR_DATABASE > mysqldump_YOUR_DATABASE_$(date +%Y%m%d%H%M%S).sql
+
+  # 更好的方法是使用配置文件存储凭证
+  vim ~/.my.cnf
+  ```
+
+  ```cnf
+  [mysqldump]
+  user=root
+  password=YOUR_PASSWORD
+  ```
+
+  ```sh
+  # 修改权限
+  chmod 600 ~/.my.cnf
+
+  # 执行备份(无需输入密码)
+  mysqldump --single-transaction YOUR_DATABASE > mysqldump_YOUR_DATABASE_$(date +%Y%m%d%H%M%S).sql
+
+  # 创建定时备份任务，每小时一次
+  crontab -e
+  ```
+  
+  ```crontab
+  0 * * * * mysqldump --single-transaction YOUR_DATABASE > /path/to/mysqldump_YOUR_DATABASE_$(date +\%Y\%m\%d\%H\%M\%S).sql
+  ```
+
+  ```sh
+  # 查看定时任务
+  crontab -l
+
+  # 导入数据库
+  mysql -u YOUR_USERNAME -p YOUR_DATABASE < YOUR_DATABASE.sql
+  ```
+
 ### redis
 
   ```sh
@@ -446,6 +508,8 @@ npm config get registry
   sudo firewall-cmd --reload
   # 测试Redis连接，应该看到回复：PONG
   redis-cli ping
+  # 如果设置有密码
+  redis-cli -a YOUR_PASSWORD
   ```
 
 ### postgresql + postgis
@@ -513,8 +577,37 @@ npm config get registry
   # 退出数据库命令：\q 或 exit 或 quit
   \q
 
-  # 导出数据库
+  # 导出数据库，需要输入密码
   pg_dump -U postgres -d xxx > pgdump_xxx_$(date +%Y%m%d%H%M%S).sql
+
+  # 使用连接字符串
+  pg_dump "postgresql://postgres:YOUR_PASSWORD@localhost:5432/YOUR_DATABASE" > pgdump_YOUR_DATABASE_$(date +%Y%m%d%H%M%S).sql
+
+  # 更好的方式是创建密码文件
+  vim ~/.pgpass
+  ```
+
+  ```pgpass
+  # 格式：hostname:port:database:username:password
+  localhost:5432:*:postgres:YOUR_PASSWORD
+  ```
+
+  ```sh
+  # 设置权限
+  chmod 600 ~/.pgpass
+
+  # 现在可以不输入密码执行备份
+  pg_dump -h localhost -U postgres -d YOUR_DATABASE > pgdump_YOUR_DATABASE_$(date +%Y%m%d%H%M%S).sql
+
+  # 创建定时任务，每小时备份一次
+  crontab -e
+  ```
+
+  ```crontab
+  0 * * * * pg_dump -h localhost -U postgres -d YOUR_DATABASE > /path/to/pgdump_YOUR_DATABASE_$(date +\%Y\%m\%d\%H\%M\%S).sql
+  ```
+
+  ```sh
   # 导入数据库
   psql -U postgres -d xxx < xxx.sql
   ```
@@ -980,7 +1073,6 @@ npm config get registry
   ```sh
   # 重启nginx使配置生效
   sudo systemctl restart nginx
-  # planka怎么配置多域名
   ```
 
 END.
