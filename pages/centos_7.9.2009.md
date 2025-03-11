@@ -460,6 +460,9 @@ npm config get registry
   # 初始化数据库
   sudo /usr/pgsql-14/bin/postgresql-14-setup initdb
 
+  # 设置密码
+  sudo passwd postgres
+
   # 启用并启动
   sudo systemctl enable postgresql-14
   sudo systemctl start postgresql-14
@@ -472,7 +475,7 @@ npm config get registry
   # 进入数据库
   psql
   # 修改密码
-  ALTER USER postgres WITH PASSWORD 'postgres';
+  ALTER USER postgres WITH PASSWORD 'YOUR_PASSWORD';
   # 退出数据库命令：\q 或 exit 或 quit
   \q
 
