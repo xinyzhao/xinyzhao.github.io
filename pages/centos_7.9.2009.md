@@ -525,7 +525,7 @@ npm config get registry
   sudo /usr/pgsql-14/bin/postgresql-14-setup initdb
 
   # 设置密码
-  sudo passwd postgres
+  sudo passwd YOUR_PASSWORD
 
   # 启用并启动
   sudo systemctl enable postgresql-14
