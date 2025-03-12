@@ -846,9 +846,13 @@ npm config get registry
 
 ### 版本控制系统：[gitlab](https://gitlab.com/gitlab-org/gitlab-foss)
 
+#### 参考
+
 [参考1](https://blog.csdn.net/weixin_56270746/article/details/125427722)
 [参考2](https://segmentfault.com/a/1190000040220475)
 [参考3](https://blog.csdn.net/unhejing/article/details/104767623)
+
+#### 安装步骤
 
   ```sh
   # 安装必要的依赖
@@ -876,7 +880,7 @@ npm config get registry
   sudo yum install -y gitlab-ce
 
   # 配置 GitLab
-  sudo vi /etc/gitlab/gitlab.rb
+  sudo vim /etc/gitlab/gitlab.rb
 
   # 修改以下配置
   external_url 'http://192.168.5.128:8929'    # 修改端口号
@@ -899,8 +903,11 @@ npm config get registry
   # 检查服务是否正常运行
   sudo gitlab-ctl status
   sudo netstat -tlnp | grep 8929
+  ```
 
-  # 常用管理命令
+#### 常用管理命令
+
+  ```sh
   sudo gitlab-ctl start          # 启动所有服务
   sudo gitlab-ctl status         # 查看服务状态
   sudo gitlab-ctl stop           # 停止所有服务
@@ -909,9 +916,10 @@ npm config get registry
   sudo gitlab-ctl tail           # 查看日志
   ```
 
+#### 配置 nginx 反向代理
+
   ```sh
-  # 配置nginx反向代理
-  sudo vi /etc/nginx/conf.d/gitlab.conf
+  sudo vim /etc/nginx/conf.d/gitlab.conf
   ```
 
   ```nginx
@@ -984,6 +992,143 @@ npm config get registry
   sudo systemctl restart nginx;
   # 查看初始密码（root用户）
   sudo cat /etc/gitlab/initial_root_password
+  ```
+
+#### 修改存储路径
+
+  ```sh
+  # 修改配置文件
+  sudo vim /etc/gitlab/gitlab.rb
+  ```
+
+  ```ruby
+  # 修改存储路径
+  git_data_dirs({
+    "default" => {
+      "path" => "/mnt/nfs-01/git-data"
+    }
+  })
+  # 修改共享文件位置
+  gitlab_rails['shared_path'] = "/var/opt/gitlab/gitlab-rails/shared"
+  # 修改 PostgreSQL 数据库位置
+  postgresql['dir'] = "/var/opt/gitlab/postgresql"
+  # 修改 Redis 数据库位置
+  redis['dir'] = "/var/opt/gitlab/redis"
+  # 修改 CI/CD 构建文件位置
+  gitlab_ci['builds_directory'] = "/var/opt/gitlab/gitlab-ci/builds"
+  # 修改上传位置
+  gitlab_rails['uploads_directory'] = "/var/opt/gitlab/gitlab-rails/uploads"
+  ```
+
+  ```sh
+  # 创建必要的目录
+  sudo mkdir -p /data/gitlab/{git-data,shared,postgresql,redis,builds,uploads}
+  # 确保目录权限正确
+  sudo chown -R git:git /data/gitlab/
+  sudo chown -R gitlab-psql:gitlab-psql /data/gitlab/postgresql
+  sudo chown -R gitlab-redis:git /data/gitlab/redis
+  # 停止 GitLab 服务
+  sudo gitlab-ctl stop
+  # 迁移现有数据到新目录
+  sudo rsync -av --delete /var/opt/gitlab/git-data/ /data/git-data/
+  sudo rsync -av --delete /var/opt/gitlab/gitlab-rails/shared/ /data/gitlab/shared/
+  sudo rsync -av --delete /var/opt/gitlab/postgresql/ /data/gitlab/postgresql/
+  sudo rsync -av --delete /var/opt/gitlab/redis/ /data/gitlab/redis/
+  sudo rsync -av --delete /var/opt/gitlab/builds/ /data/gitlab/builds/
+  sudo rsync -av --delete /var/opt/gitlab/gitlab-rails/uploads/ /data/gitlab/uploads/
+  # 重新配置并启动 GitLab
+  sudo gitlab-ctl reconfigure
+  sudo gitlab-ctl start
+  # 验证服务状态
+  sudo gitlab-ctl status
+  ```
+
+#### 数据备份
+
+  ```sh
+  # 修改配置文件
+  sudo vim /etc/gitlab/gitlab.rb
+  ```
+
+  ```ruby
+  # 修改备份路径
+  gitlab_rails['backup_path'] = "/var/opt/gitlab/backups"  
+  # 备份保存时间(单位:秒,默认:604800秒即7天)
+  gitlab_rails['backup_keep_time'] = 604800
+  ```
+
+  ```sh
+  # 创建备份目录
+  sudo mkdir -p /data/gitlab/backups
+  # 确保目录权限正确
+  sudo chown -R git:git /data/gitlab/backups
+
+  # 重新加载配置
+  sudo gitlab-ctl reconfigure
+
+  # 创建完整备份(包含所有数据)
+  sudo gitlab-backup create STRATEGY=copy
+  # 或者使用简写形式
+  sudo gitlab-rake gitlab:backup:create
+
+  # 只备份特定内容(db,uploads,repositories,builds,artifacts,lfs,registry,pages,packages)
+  sudo gitlab-rake gitlab:backup:create SKIP=artifacts,builds
+
+  # 创建定时备份任务
+  sudo crontab -e
+  ```
+
+  ```crontab
+  # 每天凌晨2点进行备份
+  0 2 * * * /opt/gitlab/bin/gitlab-backup create STRATEGY=copy
+  ```
+
+备份内容包括:
+
+- 数据库
+- 代码仓库
+- 配置文件
+- 上传的文件
+- CI/CD 构建产物
+- LFS 对象
+- 容器注册表
+- Pages 静态文件
+- Package 仓库
+
+#### 恢复备份
+
+  ```sh
+  # 1. 停止相关服务
+  sudo gitlab-ctl stop unicorn
+  sudo gitlab-ctl stop puma
+  sudo gitlab-ctl stop sidekiq
+
+  # 2. 确认版本匹配(备份文件格式: timestamp_gitlab_backup.tar)
+  sudo gitlab-backup restore BACKUP=1707654321
+
+  # 3. 重启所有服务
+  sudo gitlab-ctl restart
+
+  # 4. 检查恢复状态
+  sudo gitlab-rake gitlab:check SANITIZE=true
+  ```
+
+注意事项:
+
+1. 备份和恢复必须在相同版本间进行
+2. 恢复时需要停止写入服务
+3. 密钥文件需要单独备份
+4. 建议配置自动定时备份
+  
+#### 备份和恢复配置文件
+
+  ```sh
+  # 备份配置文件
+  sudo tar -czf gitlab_config_$(date +%Y%m%d%H%M%S).tar.gz /etc/gitlab
+
+  # 恢复配置文件
+  sudo tar -xzf gitlab_config_xxx.tar.gz -C /
+  sudo gitlab-ctl reconfigure
   ```
 
 ### 项目管理系统：[planka](https://planka.app/)
