@@ -93,7 +93,7 @@
   whoami
   ```
 
-### 配置ssh
+### 配置 SSH
 
   ```sh
   # 编辑ssh配置文件
@@ -146,14 +146,14 @@
   sudo yum install -y net-tools vim
   ```
 
-### 配置yum源
+### 配置 yum 源
 
 [参考1](https://www.cnblogs.com/hzke/p/17849772.html)
 [参考2](https://www.cnblogs.com/lanjianhua/p/18357189)
 
   ```sh
-  # 备份本地yum源
-  sudo cd /etc/yum.repos.d/
+  # 备份本地 yum 源
+  cd /etc/yum.repos.d/
   sudo mkdir backup
   sudo mv *.repo backup/
   # 查看系统版本
@@ -170,14 +170,14 @@
 
 ## 应用环境
 
-### zsh + oh my zsh
+### ZSH + Oh My Zsh
 
   ```sh
   # 安装zsh和git
   sudo yum -y install zsh git
   # 设置为zsh
   chsh -s /bin/zsh
-  # 安装oh my zsh
+  # 安装oh-my-zsh
   git clone https://gitee.com/mirrors/oh-my-zsh.git ~/.oh-my-zsh
   # 配置zshrc
   cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
@@ -189,7 +189,7 @@
   vim ~/.zshrc
   ```
 
-  > [oh my zsh 主题预览](https://github.com/ohmyzsh/ohmyzsh/wiki/themes)
+  > [Oh My Zsh 主题预览](https://github.com/ohmyzsh/ohmyzsh/wiki/themes)
 
   ```sh
   # 设置主题
@@ -208,10 +208,10 @@
   source ~/.zshrc
   ```
 
-### tmux
+### Tmux
 
   ```sh
-    # 安装tmux
+  # 安装 Tmux
   sudo yum install -y tmux
 
   # 创建新会话
@@ -227,7 +227,7 @@
   tmux attach -t session_name
   ```
 
-### java
+### Java
 
   ```sh
   # 检查系统是否已安装Java
@@ -242,7 +242,7 @@
   ls -l /usr/bin/java
   ls -l /etc/alternatives/java
 
-  # 配置JAVA_HOME环境变量
+  # 配置环境变量
   sudo vi /etc/profile.d/java.sh
   ```
 
@@ -257,7 +257,7 @@
   source /etc/profile
   ```
 
-### python
+### Python
 
   ```sh
   # 检查系统当前Python版本
@@ -289,26 +289,26 @@
 
   ```sh
   # 安装 EPEL 仓库
-sudo yum install -y epel-release
-# 安装 Node.js 和 npm
-sudo yum install -y nodejs npm
-# 验证安装
-node --version
-npm --version
+  sudo yum install -y epel-release
+  # 安装 Node.js 和 npm
+  sudo yum install -y nodejs npm
+  # 验证安装
+  node --version
+  npm --version
 
-# 安装 nrm (npm registry manager)
-sudo npm install -g nrm
-# 查看可用的 npm 镜像源
-nrm ls
-# 测试各个镜像源的速度
-nrm test
-# 切换到淘宝镜像源
-nrm use taobao
-# 验证当前使用的镜像源
-npm config get registry
+  # 安装 nrm (npm registry manager)
+  sudo npm install -g nrm
+  # 查看可用的 npm 镜像源
+  nrm ls
+  # 测试各个镜像源的速度
+  nrm test
+  # 切换到淘宝镜像源
+  nrm use taobao
+  # 验证当前使用的镜像源
+  npm config get registry
   ```
 
-### nginx
+### Nginx
 
   ```sh
   # 安装 EPEL 仓库（如果还没安装）
@@ -365,7 +365,9 @@ npm config get registry
   sudo firewall-cmd --reload
   ```
 
-### mysql
+### MySQL
+
+#### 安装 MySQL
 
   ```sh
   # 检查并删除已有的MySQL/MariaDB
@@ -424,31 +426,65 @@ npm config get registry
   sudo systemctl status mysqld
   ```
 
+#### 修改 MySQL 密码
+
   ```sh
-  # 1. 编辑MySQL配置文件
+  # 1. 编辑 MySQL 配置文件
   sudo vim /etc/my.cnf
 
-  # 2. 在[mysqld]部分添加
+  # 2. 在 [mysqld] 部分添加
   skip-grant-tables
 
-  # 3. 重启MySQL服务
+  # 3. 重启 MySQL 服务
   sudo systemctl restart mysqld
 
   # 4. 无密码登录
   mysql -u root
 
-  # 5. 执行以下SQL命令
+  # 5. 执行以下 SQL 命令
   FLUSH PRIVILEGES;
   ALTER USER 'root'@'localhost' IDENTIFIED BY 'NEW_PASSWORD';
   FLUSH PRIVILEGES;
   EXIT;
 
-  # 6. 删除skip-grant-tables
+  # 6. 删除 skip-grant-tables
   sudo sed -i '/skip-grant-tables/d' /etc/my.cnf
 
-  # 7. 重启MySQL服务
+  # 7. 重启 MySQL 服务
   sudo systemctl restart mysqld
   ```
+
+#### MySQL 数据迁移
+
+  ```sh
+  # 创建新目录
+  sudo mkdir -p /home/.mysql
+  # 修改目录权限
+  sudo chown mysql:mysql /home/.mysql
+  sudo chmod 750 /home/.mysql
+  # 编辑配置文件
+  sudo vim /etc/my.cnf
+  ```
+
+  ```cnf
+  # 修改数据目录
+  datadir=/home/.mysql
+  ```
+
+  ```sh
+  # 停止 MySQL 服务
+  sudo systemctl stop mysqld
+  # 复制现有数据到新目录
+  sudo rsync -av /var/lib/mysql/ /home/.mysql/
+  # 启动 MySQL 服务
+  sudo systemctl start mysqld
+  # 检查状态
+  sudo systemctl status mysqld
+  # 查看错误日志
+  sudo tail -f /var/log/mysqld.log
+  ```
+
+#### MySQL 数据备份
 
   ```sh
   # 备份数据库，会有安全警告
@@ -480,14 +516,138 @@ npm config get registry
   ```
 
   ```sh
-  # 查看定时任务
-  crontab -l
+  # 创建备份脚本，执行MySQL备份，将备份文件压缩为 tar.gz 格式，删除原始SQL文件，清理7天前的备份文件
+  vim /path/to/mysql_backup.sh
+  ```
 
-  # 导入数据库
+  ```sh
+  #!/bin/bash
+  # filepath: /path/to/mysql_backup.sh
+
+  # 设置备份目录
+  BACKUP_DIR="/path/to/backups"
+  # 设置日志文件
+  LOG_FILE="${BACKUP_DIR}/backup.log"
+  # 确保备份目录存在
+  mkdir -p $BACKUP_DIR
+
+  # 设置日期格式
+  DATE=$(date +%Y%m%d%H%M%S)
+  # 设置数据库信息
+  DB_NAME="YOUR_DATABASE"
+  DB_USER="YOUR_USERNAME"
+  # 设置备份保留天数
+  KEEP_DAYS=${1:-7}
+  # 文件名
+  SQL_FILE="mysqldump_${DB_NAME}_${DATE}.sql"
+  ZIP_FILE="mysqldump_${DB_NAME}_${DATE}.tar.gz"
+
+  # 日志函数
+  log() {
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+  }
+
+  # 检查 MySQL 服务状态
+  check_mysql_status() {
+      if ! systemctl is-active --quiet mysqld; then
+          log "错误: MySQL 服务未运行"
+          exit 1
+      fi
+  }
+
+  # 检查 MySQL 连接
+  check_mysql_connection() {
+      if ! mysql -u "$DB_USER" --execute "SELECT 1" >/dev/null 2>&1; then
+          log "错误: 无法连接到 MySQL 数据库"
+          exit 1
+      fi
+  }
+
+  # 开始备份
+  log "开始备份 MySQL 数据库..."
+  log "备份文件: $SQL_FILE"
+
+  # 检查服务状态
+  check_mysql_status
+  check_mysql_connection
+
+  # 创建数据库备份
+  if mysqldump --single-transaction -u "$DB_USER" "$DB_NAME" > "$BACKUP_DIR/$SQL_FILE"; then
+      log "数据库备份成功，文件大小: $(du -h "$BACKUP_DIR/$SQL_FILE" | cut -f1)"
+      
+      # 进入备份目录
+      cd $BACKUP_DIR || exit 1
+      
+      # 压缩备份文件
+      log "开始压缩备份文件..."
+      if tar -czf $ZIP_FILE $SQL_FILE; then
+          # 验证压缩文件
+          if tar -tzf $ZIP_FILE >/dev/null 2>&1; then
+              log "压缩成功，压缩文件大小: $(du -h "$ZIP_FILE" | cut -f1)"
+              rm -f $SQL_FILE
+              log "已删除原始 SQL 文件"
+              
+              # 清理旧备份
+              OLD_FILES=$(find $BACKUP_DIR -name "mysqldump_${DB_NAME}_*.tar.gz" -mtime +${KEEP_DAYS})
+              if [ ! -z "$OLD_FILES" ]; then
+                  log "清理 ${KEEP_DAYS} 天前的备份文件:"
+                  echo "$OLD_FILES" | while read file; do
+                      rm -f "$file"
+                      log "已删除: $(basename "$file")"
+                  done
+              else
+                  log "没有需要清理的旧备份文件"
+              fi
+          else
+              log "错误: 压缩文件验证失败，保留原始 SQL 文件"
+              rm -f $ZIP_FILE
+              exit 1
+          fi
+      else
+          log "错误: 压缩失败，保留原始 SQL 文件"
+          exit 1
+      fi
+  else
+      log "错误: 数据库备份失败"
+      exit 1
+  fi
+
+  # 统计信息
+  TOTAL_BACKUPS=$(find $BACKUP_DIR -name "mysqldump_${DB_NAME}_*.tar.gz" | wc -l)
+  TOTAL_SIZE=$(du -sh $BACKUP_DIR | cut -f1)
+
+  log "备份完成"
+  log "备份统计:"
+  log "- 总备份文件数: $TOTAL_BACKUPS"
+  log "- 备份目录总大小: $TOTAL_SIZE"
+  log "- 备份保留天数: $KEEP_DAYS 天"
+  log "============================================"
+  ```
+
+  ```sh
+  # 添加执行权限
+  chmod +x /path/to/mysql_backup.sh
+
+  # 使用默认保留天数(7天)运行
+  /path/to/mysql_backup.sh
+
+  # 保留30天
+  /path/to/mysql_backup.sh 30
+
+  # 添加定时任务
+  crontab -e
+
+  # 每小时备份一次
+  0 * * * * /path/to/backup.sh
+  ```
+
+#### MySQL 数据恢复
+
+  ```sh
   mysql -u YOUR_USERNAME -p YOUR_DATABASE < YOUR_DATABASE.sql
   ```
 
-### redis
+### Redis
 
   ```sh
   # 安装 EPEL 仓库（如果还没安装）
@@ -512,7 +672,47 @@ npm config get registry
   redis-cli -a YOUR_PASSWORD
   ```
 
-### postgresql + postgis
+#### Redis 数据迁移
+
+  ```sh
+  # 先停止 Redis 服务
+  sudo systemctl stop redis
+
+  # 创建新的数据目录
+  sudo mkdir -p /home/.redis
+  sudo chown redis:redis /home/.redis
+  sudo chmod 750 /home/.redis
+
+  # 编辑 Redis 配置文件
+  sudo vim /etc/redis.conf
+  ```
+
+  ```conf
+  # 修改数据目录
+  dir /home/.redis
+  ```
+
+  ```sh
+  # 复制现有数据到新目录
+  sudo rsync -av /var/lib/redis/ /home/.redis/
+  # 启动 Redis 服务
+  sudo systemctl start redis
+  # 检查状态
+  sudo systemctl status redis
+
+  # 验证数据
+  redis-cli
+  # 如果设置了密码
+  redis-cli -a YOUR_PASSWORD
+  # 查看键值数量
+  DBSIZE
+  # 列出所有键
+  KEYS *
+  ```
+
+### PostgreSQL
+
+#### 安装 PostgreSQL
 
   ```sh
   # 安装 rpm 库
@@ -525,7 +725,7 @@ npm config get registry
   sudo /usr/pgsql-14/bin/postgresql-14-setup initdb
 
   # 设置密码
-  sudo passwd YOUR_PASSWORD
+  sudo passwd postgres
 
   # 启用并启动
   sudo systemctl enable postgresql-14
@@ -576,7 +776,49 @@ npm config get registry
   CREATE EXTENSION IF NOT EXISTS postgis;
   # 退出数据库命令：\q 或 exit 或 quit
   \q
+  ```
 
+#### PostgreSQL 数据迁移
+
+  ```sh
+  # 先停止 PostgreSQL 服务
+  sudo systemctl stop postgresql-14
+
+  # 创建新的数据目录
+  sudo mkdir -p /home/.postgresql
+  sudo chown postgres:postgres /home/.postgresql
+  sudo chmod 750 /home/.postgresql
+  # 复制现有数据到新目录
+  sudo rsync -av /var/lib/pgsql/14/data/ /home/.postgresql/
+
+  # 修改 systemd 服务文件
+  sudo vim /usr/lib/systemd/system/postgresql-14.service
+  ```
+
+  ```service
+  # 修改数据目录
+  Environment=PGDATA=/home/.postgresql
+  ```
+
+  ```sh
+  # 重新加载 systemd 配置
+  sudo systemctl daemon-reload
+  # 启动 PostgreSQL 服务
+  sudo systemctl start postgresql-14
+  # 检查状态
+  sudo systemctl status postgresql-14
+
+  # 登录验证数据目录
+  psql -U postgres
+  # 查看数据目录
+  SHOW data_directory;
+  # 退出数据库
+  \q
+  ```
+
+#### PostgreSQL 数据备份
+
+  ```sh
   # 导出数据库，需要输入密码
   pg_dump -U postgres -d xxx > pgdump_xxx_$(date +%Y%m%d%H%M%S).sql
 
@@ -588,8 +830,7 @@ npm config get registry
   ```
 
   ```pgpass
-  # 格式：hostname:port:database:username:password
-  localhost:5432:*:postgres:YOUR_PASSWORD
+  # 格式：hostname:port:database:username:password localhost:5432:*:postgres:YOUR_PASSWORD
   ```
 
   ```sh
@@ -608,11 +849,142 @@ npm config get registry
   ```
 
   ```sh
-  # 导入数据库
-  psql -U postgres -d xxx < xxx.sql
+  # 创建备份脚本，备份成功后压缩文件，删除 sql 文件，保留最近 7 天的备份
+  vim /path/to/postgresql_backup.sh
+  ```
+  
+  ```sh
+  #!/bin/bash
+  # filepath: /path/to/postgresql_backup.sh
+
+  # 设置备份目录
+  BACKUP_DIR="/path/to/backups"
+  # 设置日志文件
+  LOG_FILE="${BACKUP_DIR}/backup.log"
+  # 确保目录存在
+  mkdir -p $BACKUP_DIR
+
+  # 设置日期格式
+  DATE=$(date +%Y%m%d%H%M%S)
+  # 设置数据库信息
+  DB_NAME="YOUR_DATABASE"
+  DB_USER="postgres"
+  DB_HOST="localhost"
+  DB_PORT="5432"
+  # 设置备份保留天数
+  KEEP_DAYS=${1:-7}
+  # 文件名
+  SQL_FILE="pg_dump_${DB_NAME}_${DATE}.sql"
+  ZIP_FILE="pg_dump_${DB_NAME}_${DATE}.tar.gz"
+
+  # 日志函数
+  log() {
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+  }
+
+  # 检查 PostgreSQL 服务状态
+  check_postgresql_status() {
+      if ! systemctl is-active --quiet postgresql-14; then
+          log "错误: PostgreSQL 服务未运行"
+          exit 1
+      fi
+  }
+
+  # 检查数据库连接
+  check_postgresql_connection() {
+      if ! psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c '\q' >/dev/null 2>&1; then
+          log "错误: 无法连接到 PostgreSQL 数据库"
+          exit 1
+      fi
+  }
+
+  # 开始备份
+  log "开始备份 PostgreSQL 数据库..."
+  log "备份文件: $SQL_FILE"
+
+  # 检查服务状态
+  check_postgresql_status
+  check_postgresql_connection
+
+  # 创建数据库备份
+  if pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$DB_NAME" > "$BACKUP_DIR/$SQL_FILE"; then
+      log "数据库备份成功，文件大小: $(du -h "$BACKUP_DIR/$SQL_FILE" | cut -f1)"
+      
+      # 进入备份目录
+      cd $BACKUP_DIR || exit 1
+      
+      # 压缩备份文件
+      log "开始压缩备份文件..."
+      if tar -czf $ZIP_FILE $SQL_FILE; then
+          # 验证压缩文件
+          if tar -tzf $ZIP_FILE >/dev/null 2>&1; then
+              log "压缩成功，压缩文件大小: $(du -h "$ZIP_FILE" | cut -f1)"
+              rm -f $SQL_FILE
+              log "已删除原始 SQL 文件"
+              
+              # 清理旧备份
+              OLD_FILES=$(find $BACKUP_DIR -name "pg_dump_${DB_NAME}_*.tar.gz" -mtime +${KEEP_DAYS})
+              if [ ! -z "$OLD_FILES" ]; then
+                  log "清理 ${KEEP_DAYS} 天前的备份文件:"
+                  echo "$OLD_FILES" | while read file; do
+                      rm -f "$file"
+                      log "已删除: $(basename "$file")"
+                  done
+              else
+                  log "没有需要清理的旧备份文件"
+              fi
+          else
+              log "错误: 压缩文件验证失败，保留原始 SQL 文件"
+              rm -f $ZIP_FILE
+              exit 1
+          fi
+      else
+          log "错误: 压缩失败，保留原始 SQL 文件"
+          exit 1
+      fi
+  else
+      log "错误: 数据库备份失败"
+      exit 1
+  fi
+
+  # 统计信息
+  TOTAL_BACKUPS=$(find $BACKUP_DIR -name "pg_dump_${DB_NAME}_*.tar.gz" | wc -l)
+  TOTAL_SIZE=$(du -sh $BACKUP_DIR | cut -f1)
+
+  log "备份完成"
+  log "备份统计:"
+  log "- 总备份文件数: $TOTAL_BACKUPS"
+  log "- 备份目录总大小: $TOTAL_SIZE"
+  log "- 备份保留天数: $KEEP_DAYS 天"
+  log "============================================"
   ```
 
-### minio
+  ```sh
+  # 添加执行权限
+  chmod +x /path/to/postgresql_backup.sh
+
+  # 测试运行
+  ./postgresql_backup.sh
+
+  # 保留30天
+  ./postgresql_backup.sh 30
+
+  # 添加定时任务
+  crontab -e
+
+  # 每小时备份一次
+  0 * * * * /path/to/postgresql_backup.sh
+  ```
+
+#### PostgreSQL 数据恢复
+
+  ```sh
+  psql -U postgres -d YOUR_DATABASE < xxx.sql
+  ```
+
+### MinIO
+
+#### 安装 MinIO
 
   ```sh
   # 创建必要的目录和用户
@@ -683,7 +1055,46 @@ npm config get registry
   # WebUI: http://127.0.0.1:9001
   ```
 
-### docker
+#### MinIO 数据迁移
+
+  ```sh
+  # 先停止 MinIO 服务
+  sudo systemctl stop minio
+
+  # 创建新的数据目录
+  sudo mkdir -p /home/.minio/data
+  sudo chown -R minio-user:minio-user /home/.minio
+  sudo chmod 750 /home/.minio
+
+  # 复制现有数据到新目录
+  sudo rsync -av /opt/minio/data/ /home/.minio/data/
+
+  # 修改 MinIO 环境配置文件
+  sudo vim /etc/default/minio
+  ```
+
+  ```conf
+  # 修改数据目录
+  MINIO_VOLUMES="/home/.minio/data"
+  ```
+
+  ```sh
+  # 重新加载 systemd 配置
+  sudo systemctl daemon-reload
+  
+  # 启动 MinIO 服务
+  sudo systemctl start minio
+  
+  # 检查服务状态
+  sudo systemctl status minio
+
+  # 验证数据
+  # 通过 Web 控制台访问 http://YOUR_IP:9001
+  ```
+
+### Docker
+
+#### 安装 Docker
 
   ```sh
   # 卸载旧版本
@@ -741,11 +1152,45 @@ npm config get registry
   docker run hello-world
   ```
 
+#### Docker 数据迁移
+
+  ```sh
+  # 停止 Docker 服务
+  sudo systemctl stop docker
+  sudo systemctl stop docker.socket
+
+  # 创建新的存储目录
+  sudo mkdir -p /home/.docker
+  
+  # 编辑 Docker daemon 配置文件
+  sudo vim /etc/docker/daemon.json
+  ```
+
+  ```json
+  "data-root": "/home/.docker"
+  ```
+
+  ```sh
+  # 复制现有 Docker 数据到新目录
+  sudo rsync -av /var/lib/docker/ /home/.docker/
+
+  # 重启 Docker 服务
+  sudo systemctl daemon-reload
+  sudo systemctl start docker.socket
+  sudo systemctl start docker.service
+
+  # 验证新的存储位置
+  docker info | grep "Docker Root Dir"
+
+  # 确认服务正常运行后，可以删除旧数据(可选)
+  sudo rm -rf /var/lib/docker/
+  ```
+
   > [Docker命令大全](https://www.runoob.com/docker/docker-command-manual.html)
 
 ## 应用程序
 
-### 文件管理系统：[alist](https://alist.nn.ci/zh/guide/)
+### 文件管理系统：[AList](https://alist.nn.ci/zh/guide/)
 
   ```sh
   # 创建并进入目录
@@ -844,15 +1289,9 @@ npm config get registry
   }
   ```
 
-### 版本控制系统：[gitlab](https://gitlab.com/gitlab-org/gitlab-foss)
+### 版本控制系统：[GitLab](https://gitlab.com/gitlab-org/gitlab-foss)
 
-#### 参考
-
-[参考1](https://blog.csdn.net/weixin_56270746/article/details/125427722)
-[参考2](https://segmentfault.com/a/1190000040220475)
-[参考3](https://blog.csdn.net/unhejing/article/details/104767623)
-
-#### 安装步骤
+#### 安装 GitLab
 
   ```sh
   # 安装必要的依赖
@@ -893,8 +1332,8 @@ npm config get registry
   # 启动所有服务
   sudo gitlab-ctl start
 
-  # 添加防火墙规则5080
-  sudo firewall-cmd --permanent --zone=public --add-port=5080/tcp
+  # 添加防火墙规则
+  sudo firewall-cmd --permanent --zone=public --add-port=8929/tcp
   sudo firewall-cmd --reload
 
   # 验证端口是否开放
@@ -905,7 +1344,7 @@ npm config get registry
   sudo netstat -tlnp | grep 8929
   ```
 
-#### 常用管理命令
+#### GitLab 常用命令
 
   ```sh
   sudo gitlab-ctl start          # 启动所有服务
@@ -916,7 +1355,7 @@ npm config get registry
   sudo gitlab-ctl tail           # 查看日志
   ```
 
-#### 配置 nginx 反向代理
+#### GitLab 反向代理
 
   ```sh
   sudo vim /etc/nginx/conf.d/gitlab.conf
@@ -994,9 +1433,11 @@ npm config get registry
   sudo cat /etc/gitlab/initial_root_password
   ```
 
-#### 修改存储路径
+#### GitLab 数据迁移
 
   ```sh
+  # 停止 GitLab 服务
+  sudo gitlab-ctl stop
   # 修改配置文件
   sudo vim /etc/gitlab/gitlab.rb
   ```
@@ -1005,37 +1446,35 @@ npm config get registry
   # 修改存储路径
   git_data_dirs({
     "default" => {
-      "path" => "/mnt/nfs-01/git-data"
+      "path" => "/home/.gitlab/git-data"
     }
   })
   # 修改共享文件位置
-  gitlab_rails['shared_path'] = "/var/opt/gitlab/gitlab-rails/shared"
+  gitlab_rails['shared_path'] = "/home/.gitlab/shared"
   # 修改 PostgreSQL 数据库位置
-  postgresql['dir'] = "/var/opt/gitlab/postgresql"
+  postgresql['dir'] = "/home/.gitlab/postgresql"
   # 修改 Redis 数据库位置
-  redis['dir'] = "/var/opt/gitlab/redis"
+  redis['dir'] = "/home/.gitlab/redis"
   # 修改 CI/CD 构建文件位置
-  gitlab_ci['builds_directory'] = "/var/opt/gitlab/gitlab-ci/builds"
+  gitlab_ci['builds_directory'] = "/home/.gitlab/builds"
   # 修改上传位置
-  gitlab_rails['uploads_directory'] = "/var/opt/gitlab/gitlab-rails/uploads"
+  gitlab_rails['uploads_directory'] = "/home/.gitlab/uploads"
   ```
 
   ```sh
   # 创建必要的目录
-  sudo mkdir -p /data/gitlab/{git-data,shared,postgresql,redis,builds,uploads}
+  sudo mkdir -p /home/.gitlab/{git-data,shared,postgresql,redis,builds,uploads}
   # 确保目录权限正确
-  sudo chown -R git:git /data/gitlab/
-  sudo chown -R gitlab-psql:gitlab-psql /data/gitlab/postgresql
-  sudo chown -R gitlab-redis:git /data/gitlab/redis
-  # 停止 GitLab 服务
-  sudo gitlab-ctl stop
+  sudo chown -R git:git /home/.gitlab/
+  sudo chown -R gitlab-psql:gitlab-psql /home/.gitlab/postgresql
+  sudo chown -R gitlab-redis:git /home/.gitlab/redis
   # 迁移现有数据到新目录
-  sudo rsync -av --delete /var/opt/gitlab/git-data/ /data/git-data/
-  sudo rsync -av --delete /var/opt/gitlab/gitlab-rails/shared/ /data/gitlab/shared/
-  sudo rsync -av --delete /var/opt/gitlab/postgresql/ /data/gitlab/postgresql/
-  sudo rsync -av --delete /var/opt/gitlab/redis/ /data/gitlab/redis/
-  sudo rsync -av --delete /var/opt/gitlab/builds/ /data/gitlab/builds/
-  sudo rsync -av --delete /var/opt/gitlab/gitlab-rails/uploads/ /data/gitlab/uploads/
+  sudo rsync -av --delete /var/opt/gitlab/git-data/ /home/.gitlab/git-data/
+  sudo rsync -av --delete /var/opt/gitlab/gitlab-rails/shared/ /home/.gitlab/shared/
+  sudo rsync -av --delete /var/opt/gitlab/postgresql/ /home/.gitlab/postgresql/
+  sudo rsync -av --delete /var/opt/gitlab/redis/ /home/.gitlab/redis/
+  sudo rsync -av --delete /var/opt/gitlab/builds/ /home/.gitlab/builds/
+  sudo rsync -av --delete /var/opt/gitlab/gitlab-rails/uploads/ /home/.gitlab/uploads/
   # 重新配置并启动 GitLab
   sudo gitlab-ctl reconfigure
   sudo gitlab-ctl start
@@ -1043,7 +1482,7 @@ npm config get registry
   sudo gitlab-ctl status
   ```
 
-#### 数据备份
+#### GitLab 数据备份
 
   ```sh
   # 修改配置文件
@@ -1052,16 +1491,16 @@ npm config get registry
 
   ```ruby
   # 修改备份路径
-  gitlab_rails['backup_path'] = "/var/opt/gitlab/backups"  
+  gitlab_rails['backup_path'] = "/home/.gitlab/backups"  
   # 备份保存时间(单位:秒,默认:604800秒即7天)
   gitlab_rails['backup_keep_time'] = 604800
   ```
 
   ```sh
   # 创建备份目录
-  sudo mkdir -p /data/gitlab/backups
+  sudo mkdir -p /home/.gitlab/backups
   # 确保目录权限正确
-  sudo chown -R git:git /data/gitlab/backups
+  sudo chown -R git:git /home/.gitlab/backups
 
   # 重新加载配置
   sudo gitlab-ctl reconfigure
@@ -1079,8 +1518,8 @@ npm config get registry
   ```
 
   ```crontab
-  # 每天凌晨2点进行备份
-  0 2 * * * /opt/gitlab/bin/gitlab-backup create STRATEGY=copy
+  # 每天凌晨1点进行备份
+  0 1 * * * /opt/gitlab/bin/gitlab-backup create STRATEGY=copy
   ```
 
 备份内容包括:
@@ -1095,7 +1534,7 @@ npm config get registry
 - Pages 静态文件
 - Package 仓库
 
-#### 恢复备份
+#### GitLab 备份恢复
 
   ```sh
   # 1. 停止相关服务
@@ -1104,6 +1543,7 @@ npm config get registry
   sudo gitlab-ctl stop sidekiq
 
   # 2. 确认版本匹配(备份文件格式: timestamp_gitlab_backup.tar)
+  # BACKUP= 参数使用备份文件名中的时间戳部分(不包含_gitlab_backup.tar)
   sudo gitlab-backup restore BACKUP=1707654321
 
   # 3. 重启所有服务
@@ -1120,7 +1560,7 @@ npm config get registry
 3. 密钥文件需要单独备份
 4. 建议配置自动定时备份
   
-#### 备份和恢复配置文件
+#### 配置文件备份和恢复
 
   ```sh
   # 备份配置文件
@@ -1131,7 +1571,9 @@ npm config get registry
   sudo gitlab-ctl reconfigure
   ```
 
-### 项目管理系统：[planka](https://planka.app/)
+### 项目管理系统：[Planka](https://planka.app/)
+
+#### 安装 Planka
 
   ```sh
   # 安装 Docker 和 Docker Compose
@@ -1219,5 +1661,154 @@ npm config get registry
   # 重启nginx使配置生效
   sudo systemctl restart nginx
   ```
+
+#### Planka 数据备份
+
+```sh
+# 创建备份目录
+mkdir -p ~/planka/backups
+
+# 备份数据库
+docker compose exec -T postgres pg_dump -U postgres planka > ~/planka/backups/pg_dump_planka_$(date +%Y%m%d%H%M%S).sql
+
+# 创建备份脚本，备份成功后压缩文件，然后删除 sql 文件，并删除30天前的备份文件
+
+crontab -e
+```
+
+```crontab
+0 2 * * * docker compose exec -T postgres pg_dump -U postgres planka > ~/planka/backups/pg_dump_planka_$(date +\%Y\%m\%d\%H\%M\%S).sql
+0 3 * * * find ~/planka/backups -type f -mtime +30 -exec rm -f {} \;
+```
+
+```sh
+# 创建备份脚本
+vim /path/to/planka_backup.sh
+```
+
+```sh
+#!/bin/bash
+# filepath: /path/to/planka_backup.sh
+
+# 设置备份目录
+BACKUP_DIR="/path/to/backups"
+# 设置日志文件
+LOG_FILE="${BACKUP_DIR}/backup.log"
+# 确保目录存在
+mkdir -p $BACKUP_DIR
+
+# 设置日期格式
+DATE=$(date +%Y%m%d%H%M%S)
+# 设置数据库信息
+DB_NAME="planka"
+DB_USER="postgres"
+# 设置备份保留天数
+KEEP_DAYS=${1:-7}
+# 文件名
+SQL_FILE="pg_dump_${DB_NAME}_${DATE}.sql"
+ZIP_FILE="pg_dump_${DB_NAME}_${DATE}.tar.gz"
+
+# 日志函数
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+# 检查 Docker 容器状态
+check_container() {
+    if ! docker compose ps postgres | grep -q "Up"; then
+        log "错误: PostgreSQL 容器未运行"
+        exit 1
+    fi
+}
+
+# 开始备份
+log "开始备份 Planka 数据库..."
+log "备份文件: $SQL_FILE"
+
+# 检查容器状态
+check_container
+
+# 创建数据库备份
+if docker compose exec -T postgres pg_dump -U $DB_USER $DB_NAME > "$BACKUP_DIR/$SQL_FILE"; then
+    log "数据库备份成功，文件大小: $(du -h "$BACKUP_DIR/$SQL_FILE" | cut -f1)"
+    
+    # 进入备份目录
+    cd $BACKUP_DIR || exit 1
+    
+    # 压缩备份文件
+    log "开始压缩备份文件..."
+    if tar -czf $ZIP_FILE $SQL_FILE; then
+        # 验证压缩文件
+        if tar -tzf $ZIP_FILE >/dev/null 2>&1; then
+            log "压缩成功，压缩文件大小: $(du -h "$ZIP_FILE" | cut -f1)"
+            rm -f $SQL_FILE
+            log "已删除原始 SQL 文件"
+            
+            # 清理旧备份
+            OLD_FILES=$(find $BACKUP_DIR -name "pg_dump_${DB_NAME}_*.tar.gz" -mtime +${KEEP_DAYS})
+            if [ ! -z "$OLD_FILES" ]; then
+                log "清理 ${KEEP_DAYS} 天前的备份文件:"
+                echo "$OLD_FILES" | while read file; do
+                    rm -f "$file"
+                    log "已删除: $(basename "$file")"
+                done
+            else
+                log "没有需要清理的旧备份文件"
+            fi
+        else
+            log "错误: 压缩文件验证失败，保留原始 SQL 文件"
+            rm -f $ZIP_FILE
+            exit 1
+        fi
+    else
+        log "错误: 压缩失败，保留原始 SQL 文件"
+        exit 1
+    fi
+else
+    log "错误: 数据库备份失败"
+    exit 1
+fi
+
+# 统计信息
+TOTAL_BACKUPS=$(find $BACKUP_DIR -name "pg_dump_${DB_NAME}_*.tar.gz" | wc -l)
+TOTAL_SIZE=$(du -sh $BACKUP_DIR | cut -f1)
+
+log "备份完成"
+log "备份统计:"
+log "- 总备份文件数: $TOTAL_BACKUPS"
+log "- 备份目录总大小: $TOTAL_SIZE"
+log "- 备份保留天数: $KEEP_DAYS 天"
+log "============================================"
+```
+
+```sh
+# 添加执行权限
+chmod +x /path/to/planka_backup.sh
+
+# 使用默认保留天数(7天)运行
+/path/to/planka_backup.sh
+
+# 指定保留天数运行(如30天)
+/path/to/planka_backup.sh 30
+
+# 添加定时任务
+crontab -e
+```
+
+```crontab
+# 每天凌晨 2 点执行备份
+0 2 * * * /path/to/planka_backup.sh
+```
+
+#### Planka 数据恢复
+
+```sh
+# 停止 planka 服务
+docker compose stop planka
+# 恢复数据库
+docker compose exec -T postgres psql -U postgres planka < ~/planka/backups/pg_dump_planka_xxx.sql
+# 重启 planka 服务
+docker compose up -d planka
+```
 
 END.
