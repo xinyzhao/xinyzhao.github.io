@@ -1,5 +1,7 @@
 # xinyzhao.github.io
 
+* [Crontab](pages/crontab.md)
+
 * [CentOS 7.9.2009](pages/centos_7.9.2009.md)
 
 * [Centos7+WiFi](pages/centos7+wifi.md)
@@ -12,6 +14,6 @@
 
 * [iTerm2](pages/iTerm2.md)
 
-* [mysql](pages/mysql.md)
+* [MySQL](pages/mysql.md)
 
-* [nginx](pages/nginx.md)
+* [Nginx](pages/nginx.md)
