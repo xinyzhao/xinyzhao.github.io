@@ -1560,7 +1560,7 @@
 3. 密钥文件需要单独备份
 4. 建议配置自动定时备份
   
-#### 配置文件备份和恢复
+#### GitLab 配置文件备份和恢复
 
   ```sh
   # 备份配置文件
@@ -1569,6 +1569,26 @@
   # 恢复配置文件
   sudo tar -xzf gitlab_config_xxx.tar.gz -C /
   sudo gitlab-ctl reconfigure
+  ```
+
+#### GitLab 配置 Gravatar
+
+  ```sh
+  # 编辑配置文件
+  sudo vim /var/opt/gitlab/gitlab-rails/etc/gitlab.yml
+  ```
+
+  ```yaml
+  gravatar:
+    #plain_url: http://cdn.sep.cc/avatar/%{hash}?s=%{size}&d=identicon
+    #ssl_url: https://cdn.sep.cc/avatar/%{hash}?s=%{size}&d=identicon
+    plain_url: http://gravatar.w3tt.com/avatar/%{hash}?s=%{size}&d=identicon
+    ssl_url: https://gravatar.w3tt.com/avatar/%{hash}?s=%{size}&d=identicon
+  ```
+
+  ```sh
+  # 重启服务
+  sudo gitlab-ctl restart
   ```
 
 ### 项目管理系统：[Planka](https://planka.app/)
@@ -1669,7 +1689,7 @@
 mkdir -p ~/planka/backups
 
 # 备份数据库
-docker compose exec -T postgres pg_dump -U postgres planka > ~/planka/backups/pg_dump_planka_$(date +%Y%m%d%H%M%S).sql
+cd ~/planka/backups && docker compose exec -T postgres pg_dump -U postgres planka > ~/planka/backups/pg_dump_planka_$(date +%Y%m%d%H%M%S).sql
 
 # 创建备份脚本，备份成功后压缩文件，然后删除 sql 文件，并删除30天前的备份文件
 
@@ -1677,7 +1697,7 @@ crontab -e
 ```
 
 ```crontab
-0 2 * * * docker compose exec -T postgres pg_dump -U postgres planka > ~/planka/backups/pg_dump_planka_$(date +\%Y\%m\%d\%H\%M\%S).sql
+0 2 * * * cd ~/planka/backups && docker compose exec -T postgres pg_dump -U postgres planka > ~/planka/backups/pg_dump_planka_$(date +\%Y\%m\%d\%H\%M\%S).sql
 0 3 * * * find ~/planka/backups -type f -mtime +30 -exec rm -f {} \;
 ```
 
@@ -1690,8 +1710,10 @@ vim /path/to/planka_backup.sh
 #!/bin/bash
 # filepath: /path/to/planka_backup.sh
 
+# 修改为你的 docker-compose.yml 所在目录
+DOCKER_COMPOSE_DIR="/path/to/planka"
 # 设置备份目录
-BACKUP_DIR="/path/to/backups"
+BACKUP_DIR="${DOCKER_COMPOSE_DIR}/backups"
 # 设置日志文件
 LOG_FILE="${BACKUP_DIR}/backup.log"
 # 确保目录存在
@@ -1715,7 +1737,7 @@ log() {
 
 # 检查 Docker 容器状态
 check_container() {
-    if ! docker compose ps postgres | grep -q "Up"; then
+    if ! cd "$DOCKER_COMPOSE_DIR" && docker compose ps postgres | grep -q "Up"; then
         log "错误: PostgreSQL 容器未运行"
         exit 1
     fi
@@ -1729,7 +1751,7 @@ log "备份文件: $SQL_FILE"
 check_container
 
 # 创建数据库备份
-if docker compose exec -T postgres pg_dump -U $DB_USER $DB_NAME > "$BACKUP_DIR/$SQL_FILE"; then
+if cd "$DOCKER_COMPOSE_DIR" && docker compose exec -T postgres pg_dump -U $DB_USER $DB_NAME > "$BACKUP_DIR/$SQL_FILE"; then
     log "数据库备份成功，文件大小: $(du -h "$BACKUP_DIR/$SQL_FILE" | cut -f1)"
     
     # 进入备份目录
