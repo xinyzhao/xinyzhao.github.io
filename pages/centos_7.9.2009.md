@@ -1833,4 +1833,76 @@ docker compose exec -T postgres psql -U postgres planka < ~/planka/backups/pg_du
 docker compose up -d planka
 ```
 
+## 远程备份(rsync/ssh)
+
+  ```sh
+  # 在本地生成 SSH 密钥对
+  ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+  # 将公钥复制到远程服务器
+  ssh-copy-id -p 2222 user@remote_host
+
+  # 本地备份到远程服务器  
+  rsync -avz -e "ssh -p 2222" /path/to/local/dir/ user@remote_host:/path/to/remote/dir/
+
+  # 从远程服务器备份到本地
+  rsync -avz -e "ssh -p 2222" user@remote_host:/path/to/remote/dir/ /path/to/local/dir/
+
+  # rsync 常用选项说明
+  # -a：归档模式，保留文件权限、时间戳、符号链接等。
+  # -v：显示详细信息。
+  # -z：压缩传输数据。
+  # -e "ssh -p PORT_NUMBER"：指定使用 SSH 并设置远程端口号。
+  # --delete：删除目标目录中源目录不存在的文件（保持同步）。
+  # --progress：显示传输进度。
+
+  # 创建备份脚本
+  vim /home/backup/backup.sh
+  ```
+
+  ```sh
+  #!/bin/bash
+  # filepath: /home/backup/backup.sh
+
+  # 本地目录
+  BACKUP_DIR="/home/backup"
+  LOGS_DIR="${BACKUP_DIR}/logs"
+  DATA_DIR="${BACKUP_DIR}/data/"
+
+  # 远程服务器信息
+  REMOTE_USER="backup"
+  REMOTE_HOST="192.168.1.127"
+  REMOTE_PORT="2222"
+  REMOTE_DIR="/home/backup/data/"
+
+  # 日志文件
+  LOG_FILE="${LOGS_DIR}/$(date '+%Y-%m-%d_%H:%M:%S').log"
+
+  # 开始备份
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始备份..." | tee -a "$LOG_FILE"
+  mkdir -p ${LOGS_DIR}
+  mkdir -p ${DATA_DIR}
+  rsync -avz -e "ssh -p ${REMOTE_PORT}" --delete --progress  "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR" "$DATA_DIR" | tee -a "$LOG_FILE"
+
+  # 检查是否成功
+  if [ $? -eq 0 ]; then
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] 备份完成！" | tee -a "$LOG_FILE"
+  else
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] 备份失败！" | tee -a "$LOG_FILE"
+  fi
+  ```
+
+  ```sh
+  # 添加执行权限
+  chmod +x /home/backup/backup.sh
+
+  # 定时备份
+  crontab -e
+
+  # 每天凌晨 5 点备份
+  0 5 * * * rsync -avz -e "ssh -p 2222" /path/to/local/dir/ user@remote_host:/path/to/remote/dir/
+  # 或者执行备份脚本
+  0 5 * * * /home/backup/backup.sh
+  ```
+
 END.
