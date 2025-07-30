@@ -17,3 +17,5 @@
 * [MySQL](pages/mysql.md)
 
 * [Nginx](pages/nginx.md)
+
+* [IndexTTS](pages/index-tts.md)
