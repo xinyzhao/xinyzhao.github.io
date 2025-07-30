@@ -51,13 +51,18 @@
 ### 安装 miniconda
 
 #### 官方网站
+
 [https://www.anaconda.com/download/success](https://www.anaconda.com/download/success)
+
+#### 清华大学镜像站
+
+[https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/](https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/)
 
 #### 下载地址
 
-* 官方下载：[https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe](https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe)
-* 清华大学：[https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/](https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/)
-* 中科大：[https://mirrors.ustc.edu.cn/anaconda/miniconda/](https://mirrors.ustc.edu.cn/anaconda/miniconda/)
+- 官方下载：[https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe](https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe)
+- 清华大学：[https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/](https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D)
+- 中科大：[https://mirrors.ustc.edu.cn/anaconda/miniconda/](https://mirrors.ustc.edu.cn/anaconda/miniconda/)
 
 ### 配置 miniconda
 
@@ -94,10 +99,11 @@ pip config set global.index-url https://mirrors.cloud.tencent.com/pypi/simple
 通过修改用户目录下的 .condarc 文件来使用镜像站。
 
 不同系统下的 .condarc 目录如下：
+
 - Linux: ${HOME}/.condarc
 - macOS: ${HOME}/.condarc
 - Windows: C:\Users\<YourUserName>\.condarc
-> Windows 用户无法直接创建名为 .condarc 的文件，可先执行 conda config --set show_channel_urls yes 生成该文件之后再修改。
+  > Windows 用户无法直接创建名为 .condarc 的文件，可先执行 conda config --set show_channel_urls yes 生成该文件之后再修改。
 
 ```bash
 channels:
@@ -120,7 +126,6 @@ custom_channels:
 conda create -n index-tts python=3.10
 conda activate index-tts
 ```
-
 
 ### 安装 pynini
 
