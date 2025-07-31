@@ -145,10 +145,10 @@ pip install WeTextProcessing --no-deps
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 ```
 
-#### 清华大学
+#### 国内镜像
 
 ```bash
-pip3 install torch torchvision torchaudio --index-url https://mirrors.nju.edu.cn/whl/cu128
+pip3 install torch torchvision torchaudio --index-url https://mirrors.nju.edu.cn/pytorch/whl/cu128/
 ```
 
 否则安装 CPU 版本：
