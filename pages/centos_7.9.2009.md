@@ -1882,7 +1882,7 @@ docker compose up -d planka
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始备份..." | tee -a "$LOG_FILE"
   mkdir -p ${LOGS_DIR}
   mkdir -p ${DATA_DIR}
-  rsync -avz -e "ssh -p ${REMOTE_PORT}" --delete --progress  "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR" "$DATA_DIR" | tee -a "$LOG_FILE"
+  rsync -av -e "ssh -p ${REMOTE_PORT}" --delete "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR" "$DATA_DIR" | tee -a "$LOG_FILE"
 
   # 检查是否成功
   if [ $? -eq 0 ]; then
