@@ -34,8 +34,8 @@ IN-USE  SSID                          MODE   CHAN  RATE        SIGNAL  BARS  SEC
 
 接下来连接WIFI网络使用命令：
 
-```text
-<https://xinyzhao.github.io/>
+```bash
+[root@a ~]# nmcli d wifi connect '要连接的WIFI名称' password '要连接的WIFI密码'
 ```
 
 连接后让我们来检查一下连接状态：nmcli dev status
