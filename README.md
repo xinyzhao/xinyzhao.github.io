@@ -4,9 +4,11 @@
 
 * [crontab](pages/crontab.md)
 
-* [centOS 7.9.2009](pages/centos_7.9.2009.md)
+* [CentOS 7.9.2009](pages/centos_7.9.2009.md)
 
-* [centos7+WiFi](pages/centos7+wifi.md)
+* [CentOS 7 WiFi](pages/centos7+wifi.md)
+
+* [Debian 12.13](pages/debian.md)
 
 * [Google maps](pages/googlemaps.md)
 
