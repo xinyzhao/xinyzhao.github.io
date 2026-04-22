@@ -10,9 +10,14 @@
 ## 安装 sudo
 
 ```bash
-apt install sudo -y
+# 切换到 root 用户
+su -
+# 安装 sudo
+apt update && apt install sudo -y
 # 将当前用户添加到 sudo 组
 usermod -aG sudo `whoami`
+# 退出 root 用户
+exit
 ```
 
 退出当前会话，重新登录以使 sudo 权限生效。
@@ -36,11 +41,9 @@ deb https://mirrors.aliyun.com/debian bookworm-updates main contrib non-free non
 deb https://mirrors.aliyun.com/debian-security bookworm-security main contrib non-free non-free-firmware
 ```
 
-更新系统
-
 ```bash
-sudo apt update
-sudo apt upgrade -y
+# 更新系统
+sudo apt update && sudo apt upgrade -y
 ```
 
 ## 安装 UFW
@@ -93,22 +96,19 @@ source ~/.zshrc
 
 ## 安装 1Panel
 
+安装位置选择当前用户下的1panel目录，防止权限不足，安装完成后，保存访问地址、端口、用户名、密码
+
 ```bash
 sudo apt install curl -y
 curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh
 sudo bash quick_start.sh
 ```
 
-安装位置选择当前用户下的1panel目录，防止权限不足，安装完成后，保存访问地址、端口、用户名、密码，最后添加ufw规则：
-
 ```bash
+# 开启ufw，允许1Panel端口
 sudo ufw allow `1Panel端口`/tcp
-```
-
-配置 Docker 国内镜像源：
-
-```bash
-vim /etc/docker/daemon.json
+# 配置 Docker 国内镜像源
+sudo vim /etc/docker/daemon.json
 ```
 
 ```json
@@ -121,10 +121,49 @@ vim /etc/docker/daemon.json
 }
 ```
 
-重启 Docker 服务：
+```bash
+# 重启 Docker 服务
+sudo systemctl restart docker
+# 将当前用户添加到 docker 组
+sudo usermod -aG docker `whoami`
+```
+
+## 安装 xfce + xrdp
 
 ```bash
-sudo systemctl restart docker
+apt install xfce4 xfce4-goodies xorg dbus-x11 x11-xserver-utils xrdp -y
+# 配置xrdp（适配xfce4，解决远程桌面黑屏）
+sudo vim /etc/xrdp/startwm.sh
+```
+
+替换文件内容为
+
+```bash
+#!/bin/sh
+unset DBUS_SESSION_BUS_ADDRESS
+unset XDG_RUNTIME_DIR
+
+. /etc/X11/Xsession
+startxfce4
+```
+
+```bash
+# 赋予执行权限
+sudo chmod +x /etc/xrdp/startwm.sh
+# 将当前用户添加到 ssl-cert 组
+sudo usermod -aG ssl-cert `whoami`
+# 添加ufw规则，允许xrdp端口
+sudo ufw allow 3389/tcp && sudo ufw reload
+# 重启 xrdp 服务
+sudo systemctl restart xrdp && sudo systemctl enable xrdp
+# 服务器优化（关闭休眠，提升稳定性）
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+# 安装 Chromium 浏览器
+sudo apt install chromium -y
+# 安装中文语言包和字体
+sudo apt install -y language-pack-zh-hans fonts-wqy-zenhei fonts-wqy-microhei fonts-noto-cjk xfonts-intl-chinese
+# 刷新字体缓存
+sudo fc-cache -fv
 ```
 
 ## 安装 WiFi 驱动
@@ -168,9 +207,7 @@ sudo apt install usb-modeswitch usb-modeswitch-data -y
 sudo usb_modeswitch -v a69c -p 5721 -M "5553424312345678000000000000061b000000020000000000000000000000"
 ```
 
-执行完不要关闭终端，观察输出提示 switch success 即成功。
-
-查看网卡接口：
+执行完不要关闭终端，观察输出提示 switch success 即成功。查看网卡接口：
 
 ```bash
 ip a
@@ -181,9 +218,9 @@ ip link
 出现 wlan0 即网卡已正常识别。
 
 永久自动切换（以后插电自动变网卡，不用每次手动输命令）
-创建系统自动切换配置文件：
 
 ```bash
+# 创建系统自动切换配置文件：
 sudo nano /usr/local/bin/aic-boot-switch.sh
 ```
 
