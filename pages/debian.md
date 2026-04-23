@@ -24,14 +24,15 @@ EOF
 apt update && apt upgrade -y
 # 安装 sudo
 apt install sudo -y
-# 将当前用户添加到 sudo 组，退出当前会话，重新登录以使 sudo 权限生效。
-usermod -aG sudo `whoami`
+# 将用户添加到 sudo 组
+usermod -aG sudo `xxx`
+# 退出当前会话，重新登录以使 sudo 权限生效。
 ```
 
 ## 安装 UFW
 
 ```bash
-sudo apt install ufw
+sudo apt install ufw -y
 sudo ufw allow 22/tcp
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
@@ -43,7 +44,7 @@ sudo ufw enable
 ```bash
 sudo apt install curl git wget vim zsh -y
 # 切换默认 shell 为 zsh
-sudo chsh -s $(which zsh)
+chsh -s $(which zsh)
 # 重新登录以使更改生效
 # 安装oh-my-zsh
 git clone https://gitee.com/mirrors/oh-my-zsh.git ~/.oh-my-zsh
@@ -81,7 +82,7 @@ source ~/.zshrc
 安装位置选择当前用户下的1panel目录，防止权限不足，安装完成后，保存访问地址、端口、用户名、密码
 
 ```bash
-sudo apt install curl -y
+mkdir -p ~/1panel && cd ~/1panel
 curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh
 sudo bash quick_start.sh
 ```
