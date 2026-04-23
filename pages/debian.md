@@ -7,7 +7,7 @@
 * Configure the package manager / Popularity 选择 No
 * 安装包选择 SSH server 和 standard system utilities
 
-## 更新 aliyun 源
+## 配置 APT
 
 ```bash
 # 切换到 root 用户
