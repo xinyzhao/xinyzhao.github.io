@@ -7,43 +7,25 @@
 * Configure the package manager / Popularity 选择 No
 * 安装包选择 SSH server 和 standard system utilities
 
-## 安装 sudo
+## 更新 aliyun 源
 
 ```bash
 # 切换到 root 用户
 su -
-# 安装 sudo
-apt update && apt install sudo -y
-# 将当前用户添加到 sudo 组
-usermod -aG sudo `whoami`
-# 退出 root 用户
-exit
-```
-
-退出当前会话，重新登录以使 sudo 权限生效。
-
-## 更新 aliyun 源
-
-```bash
 # 备份原来的源列表
-sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
-# 安装 vim 编辑器
-sudo apt install vim -y
-# 编辑源列表
-sudo vim /etc/apt/sources.list
-```
-
-将文件内容替换为以下内容：
-
-```bash
+cp /etc/apt/sources.list /etc/apt/sources.list.bak
+# 更新源列表
+cat > /etc/apt/sources.list << 'EOF'
 deb https://mirrors.aliyun.com/debian bookworm main contrib non-free non-free-firmware
 deb https://mirrors.aliyun.com/debian bookworm-updates main contrib non-free non-free-firmware
 deb https://mirrors.aliyun.com/debian-security bookworm-security main contrib non-free non-free-firmware
-```
-
-```bash
+EOF
 # 更新系统
-sudo apt update && sudo apt upgrade -y
+apt update && apt upgrade -y
+# 安装 sudo
+apt install sudo -y
+# 将当前用户添加到 sudo 组，退出当前会话，重新登录以使 sudo 权限生效。
+usermod -aG sudo `whoami`
 ```
 
 ## 安装 UFW
@@ -59,9 +41,9 @@ sudo ufw enable
 ## 安装 ZSH
 
 ```bash
-sudo apt install curl git wget zsh -y
+sudo apt install curl git wget vim zsh -y
 # 切换默认 shell 为 zsh
-chsh -s $(which zsh)
+sudo chsh -s $(which zsh)
 # 重新登录以使更改生效
 # 安装oh-my-zsh
 git clone https://gitee.com/mirrors/oh-my-zsh.git ~/.oh-my-zsh
@@ -131,7 +113,7 @@ sudo usermod -aG docker `whoami`
 ## 安装 xfce + xrdp
 
 ```bash
-apt install xfce4 xfce4-goodies xorg dbus-x11 x11-xserver-utils xrdp -y
+sudo apt install xfce4 xfce4-goodies xorg dbus-x11 x11-xserver-utils xrdp -y
 # 配置xrdp（适配xfce4，解决远程桌面黑屏）
 cat > /etc/xrdp/startwm.sh << 'EOF'
 #!/bin/sh
