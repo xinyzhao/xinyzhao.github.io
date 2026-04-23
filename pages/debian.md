@@ -4,7 +4,7 @@
 
 * 使用 debian-12.13.0-amd64-DVD-1.iso 进行安装
 * 选择 english，地区选择 Hong Kong，键盘选择 American English
-* 选择中国大陆的镜像源
+* Configure the package manager / Popularity 选择 No
 * 安装包选择 SSH server 和 standard system utilities
 
 ## 安装 sudo
@@ -133,18 +133,14 @@ sudo usermod -aG docker `whoami`
 ```bash
 apt install xfce4 xfce4-goodies xorg dbus-x11 x11-xserver-utils xrdp -y
 # 配置xrdp（适配xfce4，解决远程桌面黑屏）
-sudo vim /etc/xrdp/startwm.sh
-```
-
-替换文件内容为
-
-```bash
+cat > /etc/xrdp/startwm.sh << 'EOF'
 #!/bin/sh
 unset DBUS_SESSION_BUS_ADDRESS
 unset XDG_RUNTIME_DIR
 
 . /etc/X11/Xsession
 startxfce4
+EOF
 ```
 
 ```bash
@@ -158,10 +154,10 @@ sudo ufw allow 3389/tcp && sudo ufw reload
 sudo systemctl restart xrdp && sudo systemctl enable xrdp
 # 服务器优化（关闭休眠，提升稳定性）
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-# 安装 Chromium 浏览器
-sudo apt install chromium -y
+# 安装 firefox 浏览器
+sudo apt install firefox-esr -y
 # 安装中文语言包和字体
-sudo apt install -y language-pack-zh-hans fonts-wqy-zenhei fonts-wqy-microhei fonts-noto-cjk xfonts-intl-chinese
+sudo apt install -y fonts-wqy-microhei fonts-wqy-zenhei fonts-noto-cjk
 # 刷新字体缓存
 sudo fc-cache -fv
 ```
@@ -172,11 +168,11 @@ sudo fc-cache -fv
 
 ```bash
 # 下载驱动压缩包
-curl -O https://sftp.auroramicro.cn/aic/aic8800_linux_drvier.zip
+curl https://www.tenda.com.cn/prod/api/data/center/download/541288615886917/690937177473093 -o aic8800_linux_drvier.zip
 # 解压压缩包
 sudo apt install unzip -y && unzip aic8800_linux_drvier.zip
 # 进入驱动目录，修改权限
-cd aic8800_linux_drvier && chmod +x *.sh
+cd 源码/Appendix/linux_driver_sourcecode/aic8800_linux_drvier && chmod +x *.sh
 # 执行安装脚本
 sudo ./install_setup.sh
 # 编译安装驱动
