@@ -116,7 +116,8 @@ sudo usermod -aG docker `whoami`
 ```bash
 sudo apt install xfce4 xfce4-goodies xorg dbus-x11 x11-xserver-utils xrdp -y
 # 配置xrdp（适配xfce4，解决远程桌面黑屏）
-cat > /etc/xrdp/startwm.sh << 'EOF'
+sudo mv /etc/xrdp/startwm.sh /etc/xrdp/startwm.sh.bak
+sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
 #!/bin/sh
 unset DBUS_SESSION_BUS_ADDRESS
 unset XDG_RUNTIME_DIR
@@ -159,6 +160,7 @@ cd 源码/Appendix/linux_driver_sourcecode/aic8800_linux_drvier && chmod +x *.sh
 # 执行安装脚本
 sudo ./install_setup.sh
 # 编译安装驱动
+sudo apt install build-essential
 cd drivers/aic8800 && make && sudo make install
 ```
 
